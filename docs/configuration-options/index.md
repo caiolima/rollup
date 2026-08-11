@@ -1870,6 +1870,18 @@ export default {
 };
 ```
 
+### output.sourcemapRangeMappings
+
+|          |                                                          |
+| -------: | :------------------------------------------------------- |
+|    Type: | `boolean`                                                |
+|     CLI: | `--sourcemapRangeMappings`/`--no-sourcemapRangeMappings` |
+| Default: | `false`                                                  |
+
+Emit the experimental `rangeMappings` sourcemap extension, which marks the mappings that cover a contiguous range of unmodified code. This lets a consumer resolve every position inside such a range exactly, without a mapping per character, and produces a considerably smaller `mappings` field than the default.
+
+Only consumers that implement the extension benefit. Ones that do not will resolve a position inside a range to the range's start rather than the true position, so enabling this is a regression for tooling that has not been taught the format. The format is not yet standardized and may change.
+
 ### output.validate
 
 |          |                              |

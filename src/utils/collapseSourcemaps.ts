@@ -36,15 +36,21 @@ interface SourceMapSegmentObject {
 class Link {
 	readonly mappings: readonly SourceMapSegment[][];
 	readonly names: readonly string[];
+	readonly rangeMappings: readonly number[][] | undefined;
 	readonly sources: (Source | Link)[];
 
 	constructor(
-		map: { mappings: readonly SourceMapSegment[][]; names: readonly string[] },
+		map: {
+			mappings: readonly SourceMapSegment[][];
+			names: readonly string[];
+			rangeMappings?: readonly number[][] | undefined;
+		},
 		sources: (Source | Link)[]
 	) {
 		this.sources = sources;
 		this.names = map.names;
 		this.mappings = map.mappings;
+		this.rangeMappings = map.rangeMappings;
 	}
 
 	traceMappings() {
@@ -55,11 +61,24 @@ class Link {
 		const nameIndexMap = new Map<string, number>();
 
 		const mappings = [];
+		// Only the chunk's own map carries range mappings; links wrapping plugin
+		// sourcemaps have none, and tracing through them would not preserve the
+		// contiguity a range asserts.
+		const rangeMappings: number[][] | undefined = this.rangeMappings ? [] : undefined;
 
-		for (const line of this.mappings) {
+		for (const [lineIndex, line] of this.mappings.entries()) {
 			const tracedLine: SourceMapSegment[] = [];
+			// Both the segments and the range indices pointing into them are
+			// ascending, so a single pointer keeps them aligned while tracing
+			// drops segments.
+			const rangeIndices = this.rangeMappings?.[lineIndex];
+			const tracedRangeLine: number[] = [];
+			let rangePointer = 0;
 
-			for (const segment of line) {
+			for (const [segmentIndex, segment] of line.entries()) {
+				const startsRange = rangeIndices?.[rangePointer] === segmentIndex;
+				if (startsRange) rangePointer++;
+
 				if (segment.length === 1) continue;
 				const source = this.sources[segment[1]];
 				if (!source) continue;
@@ -103,13 +122,15 @@ class Link {
 					}
 
 					tracedLine.push(tracedSegment);
+					if (startsRange) tracedRangeLine.push(tracedLine.length - 1);
 				}
 			}
 
 			mappings.push(tracedLine);
+			rangeMappings?.push(tracedRangeLine);
 		}
 
-		return { mappings, names, sources, sourcesContent };
+		return { mappings, names, rangeMappings, sources, sourcesContent };
 	}
 
 	traceSegment(line: number, column: number, name: string): SourceMapSegmentObject | null {
@@ -222,7 +243,7 @@ export function collapseSourcemaps(
 
 	const link = new Link(map, moduleSources);
 	const source = bundleSourcemapChain.reduce(linkMap, link);
-	let { sources, sourcesContent, names, mappings } = source.traceMappings();
+	let { sources, sourcesContent, names, mappings, rangeMappings } = source.traceMappings();
 
 	if (file) {
 		const directory = dirname(file);
@@ -238,6 +259,7 @@ export function collapseSourcemaps(
 		file,
 		mappings,
 		names,
+		rangeMappings,
 		sources,
 		sourcesContent: excludeContent ? undefined : sourcesContent
 	});

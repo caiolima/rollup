@@ -78,6 +78,7 @@ Options:
 --sourcemapExcludeSources   Do not include source code in source maps
 --sourcemapFile <file>      Specify bundle position for source maps
 --sourcemapFileNames <pattern> Name pattern for emitted sourcemaps
+--sourcemapRangeMappings    Emit the experimental rangeMappings extension
 --stdin=ext                 Specify file extension used for stdin input
 --no-stdin                  Do not read "-" from stdin
 --no-strict                 Don't emit `"use strict";` in the generated modules

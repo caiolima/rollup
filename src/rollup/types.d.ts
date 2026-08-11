@@ -101,6 +101,7 @@ export interface SourceMap {
 	sourcesContent?: (string | null)[] | undefined;
 	version: number;
 	debugId?: string | undefined;
+	rangeMappings?: string | undefined;
 	toString(): string;
 	toUrl(): string;
 }
@@ -870,6 +871,7 @@ export interface OutputOptions {
 	sourcemapFileNames?: string | ((chunkInfo: PreRenderedChunk) => string) | undefined;
 	sourcemapIgnoreList?: boolean | SourcemapIgnoreListOption | undefined;
 	sourcemapPathTransform?: SourcemapPathTransformOption | undefined;
+	sourcemapRangeMappings?: boolean | undefined;
 	sourcemapDebugIds?: boolean | undefined;
 	strict?: boolean | undefined;
 	systemNullSetters?: boolean | undefined;
@@ -926,6 +928,7 @@ export interface NormalizedOutputOptions {
 	sourcemapFileNames: string | ((chunkInfo: PreRenderedChunk) => string) | undefined;
 	sourcemapIgnoreList: SourcemapIgnoreListOption;
 	sourcemapPathTransform: SourcemapPathTransformOption | undefined;
+	sourcemapRangeMappings: boolean;
 	sourcemapDebugIds: boolean;
 	strict: boolean;
 	systemNullSetters: boolean;

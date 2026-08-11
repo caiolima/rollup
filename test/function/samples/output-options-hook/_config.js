@@ -60,6 +60,7 @@ module.exports = defineTest({
 						sourcemap: false,
 						sourcemapDebugIds: false,
 						sourcemapExcludeSources: false,
+						sourcemapRangeMappings: false,
 						strict: true,
 						systemNullSetters: true,
 						validate: false,

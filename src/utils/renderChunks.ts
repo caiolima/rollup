@@ -146,7 +146,8 @@ async function transformChunk(
 		sourcemapExcludeSources,
 		sourcemapFile,
 		sourcemapPathTransform,
-		sourcemapIgnoreList
+		sourcemapIgnoreList,
+		sourcemapRangeMappings
 	} = options;
 	if (!compact && code[code.length - 1] !== '\n') code += '\n';
 
@@ -158,7 +159,9 @@ async function transformChunk(
 		else if (dir) resultingFile = resolve(dir, fileName);
 		else resultingFile = resolve(fileName);
 
-		const decodedMap = magicString.generateDecodedMap({});
+		const decodedMap = magicString.generateDecodedMap({
+			hires: sourcemapRangeMappings && 'experimental-range'
+		});
 		map = collapseSourcemaps(
 			resultingFile,
 			decodedMap,
